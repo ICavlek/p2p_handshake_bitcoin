@@ -29,6 +29,12 @@ impl BitcoinClient {
     }
 
     pub async fn handshake(&self) {
+        let raw_message = self.get_default_version_message();
+        let (response, count) = self.send_message(raw_message).await;
+        println!("{:#?}, {}", response, count);
+    }
+
+    fn get_default_version_message(&self) -> RawNetworkMessage {
         let user_agent = "/Satoshi:26.0.0/";
 
         let now = SystemTime::now()
@@ -52,11 +58,13 @@ impl BitcoinClient {
             0,
         );
 
-        let raw_message = RawNetworkMessage::new(
+        RawNetworkMessage::new(
             Network::Bitcoin.magic(),
             NetworkMessage::Version(btc_version),
-        );
+        )
+    }
 
+    async fn send_message(&self, message: RawNetworkMessage) -> (RawNetworkMessage, usize) {
         let stream = tokio::time::timeout(
             Duration::from_millis(self.timeout),
             TcpStream::connect(&self.uri),
@@ -67,14 +75,13 @@ impl BitcoinClient {
 
         let (rx_stream, mut tx_stream) = stream.into_split();
 
-        let data = serialize(&raw_message);
+        let data = serialize(&message);
         tx_stream.write_all(data.as_slice()).await.unwrap();
 
         let mut read_buffer = BytesMut::with_capacity(512);
         loop {
             if let Ok((message, count)) = deserialize_partial::<RawNetworkMessage>(&read_buffer) {
-                println!("{}, {}", message.cmd(), count);
-                break;
+                return (message, count);
             }
             match rx_stream.try_read_buf(&mut read_buffer) {
                 Ok(value) => {
