@@ -1,5 +1,5 @@
 [package]
-name = "p2p_handshake"
+name = "p2p_handshake_bitcoin"
 version = "0.1.0"
 edition = "2021"
 
