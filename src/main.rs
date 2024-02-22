@@ -6,11 +6,12 @@ use std::{
 
 use bitcoin::{
     consensus::{deserialize_partial, serialize},
-    network::{
+    network::Network,
+    p2p::{
         address,
-        constants::{Network, ServiceFlags},
         message::{NetworkMessage, RawNetworkMessage},
         message_network::VersionMessage,
+        ServiceFlags,
     },
 };
 
@@ -20,7 +21,7 @@ use tokio::{io::AsyncWriteExt, net::TcpStream};
 #[tokio::main]
 async fn main() {
     let dest_socket = "45.9.148.241:8333";
-    let user_agent = "/Satoshi:23.0.0/";
+    let user_agent = "/Satoshi:26.0.0/";
     let timeout: u64 = 200;
 
     let now = SystemTime::now()
@@ -31,20 +32,23 @@ async fn main() {
     let no_address = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)), 0);
     let node_socket = SocketAddr::from_str(dest_socket).unwrap();
 
+    let dest_address = address::Address::new(&node_socket, ServiceFlags::NONE);
+    let source_address = address::Address::new(&no_address, ServiceFlags::NONE);
+
     let btc_version = VersionMessage::new(
         ServiceFlags::NONE,
         now,
-        address::Address::new(&node_socket, ServiceFlags::NONE),
-        address::Address::new(&no_address, ServiceFlags::NONE),
+        dest_address,
+        source_address,
         now as u64,
         user_agent.to_string(),
         0,
     );
 
-    let raw_message = RawNetworkMessage {
-        magic: Network::Bitcoin.magic(),
-        payload: NetworkMessage::Version(btc_version),
-    };
+    let raw_message = RawNetworkMessage::new(
+        Network::Bitcoin.magic(),
+        NetworkMessage::Version(btc_version),
+    );
 
     let stream = tokio::time::timeout(
         Duration::from_millis(timeout),
