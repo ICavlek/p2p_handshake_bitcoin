@@ -1,18 +1,27 @@
 use bitcoin::consensus::{deserialize_partial, Decodable};
 use bytes::{Buf, BytesMut};
-use tokio::{
-    io::{AsyncReadExt, AsyncWriteExt},
-    net::tcp::{OwnedReadHalf, OwnedWriteHalf},
-};
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
-pub struct Connection {
-    rx_stream: OwnedReadHalf,
-    tx_stream: OwnedWriteHalf,
+pub struct Connection<Reader, Writer>
+where
+    Reader: AsyncReadExt + Unpin,
+    Writer: AsyncWriteExt + Unpin,
+{
+    rx_stream: Reader,
+    tx_stream: Writer,
     buffer: BytesMut,
 }
 
-impl Connection {
-    pub fn new(rx_stream: OwnedReadHalf, tx_stream: OwnedWriteHalf) -> Connection {
+impl<Reader, Writer> Connection<Reader, Writer>
+where
+    Reader: AsyncReadExt + Unpin,
+    Writer: AsyncWriteExt + Unpin,
+{
+    pub fn new(rx_stream: Reader, tx_stream: Writer) -> Connection<Reader, Writer>
+    where
+        Reader: AsyncReadExt + Unpin,
+        Writer: AsyncWriteExt + Unpin,
+    {
         Connection {
             rx_stream,
             tx_stream,
