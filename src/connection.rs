@@ -1,5 +1,5 @@
 use bitcoin::consensus::{deserialize_partial, Decodable};
-use bytes::BytesMut;
+use bytes::{Buf, BytesMut};
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
     net::tcp::{OwnedReadHalf, OwnedWriteHalf},
@@ -16,13 +16,14 @@ impl Connection {
         Connection {
             rx_stream,
             tx_stream,
-            buffer: BytesMut::with_capacity(512),
+            buffer: BytesMut::with_capacity(2048),
         }
     }
 
     pub async fn read<T: Decodable>(&mut self) -> Result<Option<(T, usize)>, anyhow::Error> {
         loop {
             if let Ok((message, count)) = deserialize_partial::<T>(&self.buffer) {
+                self.buffer.advance(count);
                 return Ok(Some((message, count)));
             }
 

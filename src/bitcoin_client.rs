@@ -20,9 +20,18 @@ impl BitcoinClient {
     }
 
     pub async fn handshake(&mut self) -> Result<(), anyhow::Error> {
-        let bitcoin_message = BitcoinMessage::version_message();
+        let bitcoin_version_message = BitcoinMessage::version_message();
         self.connection
-            .write(serialize(&bitcoin_message).as_slice())
+            .write(serialize(&bitcoin_version_message).as_slice())
+            .await?;
+        match self.connection.read::<RawNetworkMessage>().await.unwrap() {
+            Some((message, count)) => println!("{:#?}, {}", message, count),
+            None => println!("No message received"),
+        };
+
+        let bitcoin_verack_message = BitcoinMessage::verack_message();
+        self.connection
+            .write(serialize(&bitcoin_verack_message).as_slice())
             .await?;
         match self.connection.read::<RawNetworkMessage>().await.unwrap() {
             Some((message, count)) => println!("{:#?}, {}", message, count),

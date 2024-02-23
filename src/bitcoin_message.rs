@@ -45,4 +45,8 @@ impl BitcoinMessage {
             NetworkMessage::Version(btc_version),
         )
     }
+
+    pub fn verack_message() -> RawNetworkMessage {
+        RawNetworkMessage::new(Network::Bitcoin.magic(), NetworkMessage::Verack)
+    }
 }
