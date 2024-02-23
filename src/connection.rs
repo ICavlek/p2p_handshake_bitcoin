@@ -3,7 +3,6 @@ use bitcoin::{
     p2p::message::RawNetworkMessage,
 };
 use bytes::BytesMut;
-use std::io;
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
     net::tcp::{OwnedReadHalf, OwnedWriteHalf},
@@ -20,7 +19,7 @@ impl Connection {
         Connection {
             rx_stream,
             tx_stream,
-            buffer: BytesMut::with_capacity(2048),
+            buffer: BytesMut::with_capacity(512),
         }
     }
 
@@ -40,7 +39,7 @@ impl Connection {
         }
     }
 
-    pub async fn write(&mut self, message: RawNetworkMessage) -> io::Result<()> {
+    pub async fn write(&mut self, message: RawNetworkMessage) -> Result<(), anyhow::Error> {
         self.tx_stream
             .write_all(serialize(&message).as_slice())
             .await?;
