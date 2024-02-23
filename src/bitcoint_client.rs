@@ -34,7 +34,7 @@ impl BitcoinClient {
         println!("{:#?}, {}", response, count);
     }
 
-    fn get_default_version_message(&self) -> RawNetworkMessage {
+    pub fn get_default_version_message(&self) -> RawNetworkMessage {
         let user_agent = "/Satoshi:26.0.0/";
 
         let now = SystemTime::now()
