@@ -13,23 +13,22 @@ use tokio::{
     },
 };
 
-pub struct Client {
+pub struct BitcoinClient {
     pub connection: Connection,
 }
 
-impl Client {
-    pub async fn connect<T: ToSocketAddrs>(addr: T) -> Result<Client, anyhow::Error> {
+impl BitcoinClient {
+    pub async fn connect<T: ToSocketAddrs>(addr: T) -> Result<BitcoinClient, anyhow::Error> {
         let socket = tokio::time::timeout(Duration::from_millis(500), TcpStream::connect(addr))
             .await
             .unwrap()
             .unwrap();
         let (rx_stream, tx_stream) = socket.into_split();
         let connection = Connection::new(rx_stream, tx_stream);
-        Ok(Client { connection })
+        Ok(BitcoinClient { connection })
     }
 }
 
-#[derive(Debug)]
 pub struct Connection {
     rx_stream: OwnedReadHalf,
     tx_stream: OwnedWriteHalf,

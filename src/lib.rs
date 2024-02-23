@@ -1,2 +1,2 @@
-pub mod bitcoint_client;
-pub mod client;
+pub mod bitcoin_client;
+pub mod bitcoin_message;
