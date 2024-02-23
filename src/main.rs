@@ -10,6 +10,8 @@ async fn main() {
     let mut client = Client::connect("45.9.148.241:8333").await.unwrap();
     let bicoin_message = bitcoin_client.get_default_version_message();
     let _ = client.connection.write(bicoin_message).await;
-    let (message, count) = client.connection.read().unwrap();
-    println!("{:#?}, {}", message, count);
+    match client.connection.read().await.unwrap() {
+        Some((message, count)) => println!("{:#?}, {}", message, count),
+        None => println!("No message received"),
+    };
 }

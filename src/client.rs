@@ -6,7 +6,7 @@ use bitcoin::{
 };
 use bytes::BytesMut;
 use tokio::{
-    io::AsyncWriteExt,
+    io::{AsyncReadExt, AsyncWriteExt},
     net::{
         tcp::{OwnedReadHalf, OwnedWriteHalf},
         TcpStream, ToSocketAddrs,
@@ -45,23 +45,17 @@ impl Connection {
         }
     }
 
-    pub fn read(&mut self) -> Result<(RawNetworkMessage, usize), anyhow::Error> {
+    pub async fn read(&mut self) -> Result<Option<(RawNetworkMessage, usize)>, anyhow::Error> {
         loop {
             if let Ok((message, count)) = deserialize_partial::<RawNetworkMessage>(&self.buffer) {
-                return Ok((message, count));
+                return Ok(Some((message, count)));
             }
-            match self.rx_stream.try_read_buf(&mut self.buffer) {
-                Ok(value) => {
-                    if value == 0 {
-                        if self.buffer.is_empty() {
-                            println!("Empty buffer");
-                        } else {
-                            println!("Connection error");
-                        }
-                    }
-                }
-                Err(_) => {
-                    continue;
+
+            if self.rx_stream.read_buf(&mut self.buffer).await? == 0 {
+                if self.buffer.is_empty() {
+                    return Ok(None);
+                } else {
+                    return Err(anyhow::anyhow!("connection reset by peer"));
                 }
             }
         }
