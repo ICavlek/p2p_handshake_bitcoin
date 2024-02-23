@@ -16,7 +16,7 @@ use bitcoin::{
 pub struct BitcoinMessage;
 
 impl BitcoinMessage {
-    pub fn default() -> RawNetworkMessage {
+    pub fn version_message() -> RawNetworkMessage {
         let user_agent = "/Satoshi:26.0.0/";
 
         let now = SystemTime::now()
