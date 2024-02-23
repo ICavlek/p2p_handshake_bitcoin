@@ -1,7 +1,4 @@
-use bitcoin::{
-    consensus::{deserialize_partial, serialize},
-    p2p::message::RawNetworkMessage,
-};
+use bitcoin::consensus::{deserialize_partial, Decodable};
 use bytes::BytesMut;
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
@@ -23,9 +20,9 @@ impl Connection {
         }
     }
 
-    pub async fn read(&mut self) -> Result<Option<(RawNetworkMessage, usize)>, anyhow::Error> {
+    pub async fn read<T: Decodable>(&mut self) -> Result<Option<(T, usize)>, anyhow::Error> {
         loop {
-            if let Ok((message, count)) = deserialize_partial::<RawNetworkMessage>(&self.buffer) {
+            if let Ok((message, count)) = deserialize_partial::<T>(&self.buffer) {
                 return Ok(Some((message, count)));
             }
 
@@ -39,10 +36,8 @@ impl Connection {
         }
     }
 
-    pub async fn write(&mut self, message: RawNetworkMessage) -> Result<(), anyhow::Error> {
-        self.tx_stream
-            .write_all(serialize(&message).as_slice())
-            .await?;
+    pub async fn write(&mut self, message: &[u8]) -> Result<(), anyhow::Error> {
+        self.tx_stream.write_all(message).await?;
         Ok(())
     }
 }

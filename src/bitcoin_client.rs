@@ -1,3 +1,4 @@
+use bitcoin::{consensus::serialize, p2p::message::RawNetworkMessage};
 use std::time::Duration;
 use tokio::net::{TcpStream, ToSocketAddrs};
 
@@ -20,8 +21,10 @@ impl BitcoinClient {
 
     pub async fn handshake(&mut self) -> Result<(), anyhow::Error> {
         let bitcoin_message = BitcoinMessage::version_message();
-        self.connection.write(bitcoin_message).await?;
-        match self.connection.read().await.unwrap() {
+        self.connection
+            .write(serialize(&bitcoin_message).as_slice())
+            .await?;
+        match self.connection.read::<RawNetworkMessage>().await.unwrap() {
             Some((message, count)) => println!("{:#?}, {}", message, count),
             None => println!("No message received"),
         };
