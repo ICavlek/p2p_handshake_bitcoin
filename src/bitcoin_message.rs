@@ -24,17 +24,17 @@ impl BitcoinMessage {
             .unwrap()
             .as_secs() as i64;
 
-        let no_address = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)), 0);
-        let node_socket = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)), 0);
+        let receiver_socket = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)), 0);
+        let sender_socket = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)), 0);
 
-        let dest_address = address::Address::new(&node_socket, ServiceFlags::NONE);
-        let source_address = address::Address::new(&no_address, ServiceFlags::NONE);
+        let receiver_address = address::Address::new(&receiver_socket, ServiceFlags::NONE);
+        let sender_address = address::Address::new(&sender_socket, ServiceFlags::NONE);
 
         let btc_version = VersionMessage::new(
             ServiceFlags::NONE,
             now,
-            dest_address,
-            source_address,
+            receiver_address,
+            sender_address,
             now as u64,
             user_agent.to_string(),
             0,
