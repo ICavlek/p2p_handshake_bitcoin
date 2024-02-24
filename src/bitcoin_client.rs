@@ -1,31 +1,25 @@
 use bitcoin::{consensus::serialize, p2p::message::RawNetworkMessage};
-use std::time::Duration;
-use tokio::net::{
-    tcp::{OwnedReadHalf, OwnedWriteHalf},
-    TcpStream, ToSocketAddrs,
-};
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
 use crate::{bitcoin_message::BitcoinMessage, connection::Connection};
 
-pub struct BitcoinClient {
-    connection: Connection<OwnedReadHalf, OwnedWriteHalf>,
+pub struct BitcoinClient<Reader, Writer>
+where
+    Reader: AsyncReadExt + Unpin,
+    Writer: AsyncWriteExt + Unpin,
+{
+    connection: Connection<Reader, Writer>,
 }
 
-impl BitcoinClient {
-    pub async fn new<T: ToSocketAddrs>(addr: T) -> Result<BitcoinClient, anyhow::Error> {
-        let socket = tokio::time::timeout(Duration::from_millis(500), TcpStream::connect(addr))
-            .await
-            .unwrap()
-            .unwrap();
-        let (rx_stream, tx_stream) = socket.into_split();
-        let bitcoin_client = Self::connect(rx_stream, tx_stream)?;
-        Ok(bitcoin_client)
-    }
-
-    pub fn connect(
-        rx_stream: OwnedReadHalf,
-        tx_stream: OwnedWriteHalf,
-    ) -> Result<BitcoinClient, anyhow::Error> {
+impl<Reader, Writer> BitcoinClient<Reader, Writer>
+where
+    Reader: AsyncReadExt + Unpin,
+    Writer: AsyncWriteExt + Unpin,
+{
+    pub fn new(
+        rx_stream: Reader,
+        tx_stream: Writer,
+    ) -> Result<BitcoinClient<Reader, Writer>, anyhow::Error> {
         let connection = Connection::new(rx_stream, tx_stream);
         Ok(BitcoinClient { connection })
     }
