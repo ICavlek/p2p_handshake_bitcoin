@@ -36,7 +36,7 @@ where
     }
 
     #[tracing::instrument(name = "Handshake", skip(self))]
-    pub async fn handshake(&mut self) -> Result<(), anyhow::Error> {
+    pub async fn handshake(&mut self) -> Result<(), BitcoinClientError> {
         let bitcoin_version_message = BitcoinMessage::version_message();
         self.handle_message(bitcoin_version_message).await?;
         let bitcoin_verack_message = BitcoinMessage::verack_message();
@@ -48,13 +48,19 @@ where
     pub async fn handle_message(
         &mut self,
         message: RawNetworkMessage,
-    ) -> Result<(RawNetworkMessage, usize), anyhow::Error> {
+    ) -> Result<(RawNetworkMessage, usize), BitcoinClientError> {
         self.connection
             .write(serialize(&message).as_slice())
             .await?;
-        match self.connection.read::<RawNetworkMessage>().await.unwrap() {
+        let response = match self.connection.read::<RawNetworkMessage>().await {
+            Ok(response) => response,
+            Err(_) => return Err(BitcoinClientError::CommunicationError),
+        };
+        match response {
             Some((message, count)) => Ok((message, count)),
-            None => Err(anyhow::anyhow!("Empty buffer")),
+            None => Err(BitcoinClientError::UnexpectedError(anyhow::anyhow!(
+                "Empty buffer returned"
+            ))),
         }
     }
 }

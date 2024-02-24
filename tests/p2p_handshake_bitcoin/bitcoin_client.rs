@@ -1,4 +1,7 @@
-use p2p_handshake_bitcoin::{bitcoin_client::BitcoinClient, bitcoin_message::BitcoinMessage};
+use p2p_handshake_bitcoin::{
+    bitcoin_client::{BitcoinClient, BitcoinClientError},
+    bitcoin_message::BitcoinMessage,
+};
 
 use crate::helper::BitcoinNodeMock;
 
@@ -23,4 +26,18 @@ async fn bitcoin_node_responds_with_version_and_verack_message() {
         .expect("Failed to exchange verack messages");
     assert_eq!(message, BitcoinMessage::verack_message());
     assert_eq!(count, 24);
+}
+
+#[tokio::test]
+async fn bitcoin_node_responds_with_bad_u8_slice() {
+    let bitcoin_mock_node = BitcoinNodeMock::bad_u8_slice_response_on_version_message();
+    let mut bitcoin_client = BitcoinClient::new(bitcoin_mock_node.reader, bitcoin_mock_node.writer)
+        .expect("Failed to create Bitcoin client");
+
+    let bitcoin_version_message = BitcoinMessage::version_message();
+    let response = bitcoin_client.handle_message(bitcoin_version_message).await;
+    assert!(matches!(
+        response,
+        Err(BitcoinClientError::CommunicationError)
+    ));
 }
