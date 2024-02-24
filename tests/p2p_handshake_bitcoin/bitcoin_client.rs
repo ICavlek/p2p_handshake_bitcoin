@@ -9,13 +9,18 @@ async fn bitcoin_node_responds_with_version_and_verack_message() {
         .expect("Failed to create Bitcoin client");
 
     let bitcoin_version_message = BitcoinMessage::version_message();
-    bitcoin_client
+    let (message, count) = bitcoin_client
         .handle_message(bitcoin_version_message)
         .await
         .expect("Failed to exchange version messages");
+    assert_eq!(message, BitcoinMessage::version_message());
+    assert_eq!(count, 126);
+
     let bitcoin_verack_message = BitcoinMessage::verack_message();
-    bitcoin_client
+    let (message, count) = bitcoin_client
         .handle_message(bitcoin_verack_message)
         .await
         .expect("Failed to exchange verack messages");
+    assert_eq!(message, BitcoinMessage::verack_message());
+    assert_eq!(count, 24);
 }
