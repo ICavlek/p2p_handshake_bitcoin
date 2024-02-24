@@ -11,9 +11,9 @@ use tracing_subscriber::{fmt::MakeWriter, layer::SubscriberExt, EnvFilter, Regis
 /// #Example
 ///
 /// ```
-/// use p2p_handshake_solana::telemetry::get_subscriber;
+/// use p2p_handshake_bitcoin::telemetry::get_subscriber;
 /// let subscriber = get_subscriber(
-///     "p2p_handshake_solana".into(),
+///     "p2p_handshake_bitcoin".into(),
 ///     "info".into(),
 ///     std::io::stdout,
 /// );
@@ -40,9 +40,9 @@ where
 /// #Example
 ///
 /// ```
-/// use p2p_handshake_solana::telemetry::{get_subscriber, init_subscriber};
+/// use p2p_handshake_bitcoin::telemetry::{get_subscriber, init_subscriber};
 /// let subscriber = get_subscriber(
-///     "p2p_handshake_solana".into(),
+///     "p2p_handshake_bitcoin".into(),
 ///     "info".into(),
 ///     std::io::stdout,
 /// );

@@ -7,7 +7,7 @@ use p2p_handshake_bitcoin::{
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     let subscriber = get_subscriber(
-        "p2p_handshake_solana".into(),
+        "p2p_handshake_bitcoin".into(),
         "info".into(),
         std::io::stdout,
     );
