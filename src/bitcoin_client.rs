@@ -36,6 +36,7 @@ where
         Ok(())
     }
 
+    #[tracing::instrument(name = "Handling message", skip(self, message))]
     pub async fn handle_message(
         &mut self,
         message: RawNetworkMessage,
