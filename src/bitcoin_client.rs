@@ -13,6 +13,14 @@ where
     connection: Connection<Reader, Writer>,
 }
 
+#[derive(thiserror::Error, Debug)]
+pub enum BitcoinClientError {
+    #[error("Communication error: Wrong response")]
+    CommunicationError,
+    #[error(transparent)]
+    UnexpectedError(#[from] anyhow::Error),
+}
+
 impl<Reader, Writer> BitcoinClient<Reader, Writer>
 where
     Reader: AsyncReadExt + Unpin + Debug,

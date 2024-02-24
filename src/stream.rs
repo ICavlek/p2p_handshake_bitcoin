@@ -11,15 +11,11 @@ pub struct Stream {
 }
 
 impl Stream {
-    pub async fn new() -> Self {
-        let socket = tokio::time::timeout(
-            Duration::from_millis(500),
-            TcpStream::connect("45.9.148.241:8333"),
-        )
-        .await
-        .unwrap()
-        .unwrap();
+    #[tracing::instrument("Init Stream", skip(uri))]
+    pub async fn new(uri: &str) -> Result<Self, anyhow::Error> {
+        let socket =
+            tokio::time::timeout(Duration::from_millis(500), TcpStream::connect(uri)).await??;
         let (rx, tx) = socket.into_split();
-        Self { rx, tx }
+        Ok(Self { rx, tx })
     }
 }

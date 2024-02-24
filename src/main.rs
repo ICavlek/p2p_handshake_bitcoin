@@ -12,7 +12,16 @@ async fn main() -> anyhow::Result<()> {
         std::io::stdout,
     );
     init_subscriber(subscriber);
-    let stream = Stream::new().await;
+
+    let stream = match Stream::new("45.9.148.241:8333").await {
+        Ok(stream) => stream,
+        Err(e) => {
+            return {
+                tracing::error!("Failed to initialize TCP stream");
+                Err(anyhow::anyhow!(e))
+            }
+        }
+    };
     let mut bitcoin_client = BitcoinClient::new(stream.rx, stream.tx).unwrap();
     bitcoin_client.handshake().await?;
     Ok(())
