@@ -12,7 +12,15 @@ async fn main() -> anyhow::Result<()> {
         std::io::stdout,
     );
     init_subscriber(subscriber);
+    let task1 = tokio::task::spawn(perform_handshake());
+    let task2 = tokio::task::spawn(perform_handshake());
 
+    let _ = task1.await?;
+    let _ = task2.await?;
+    Ok(())
+}
+
+async fn perform_handshake() -> Result<(), anyhow::Error> {
     let stream = match Stream::new("45.9.148.241:8333").await {
         Ok(stream) => stream,
         Err(e) => {
