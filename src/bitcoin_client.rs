@@ -87,12 +87,18 @@ where
         Ok(())
     }
 
-    #[tracing::instrument(name = "Verifying verack message", skip(self, _message, _count))]
+    #[tracing::instrument(name = "Verifying verack message", skip(self, message, count))]
     fn verify_verack_message(
         &self,
-        _message: RawNetworkMessage,
-        _count: usize,
+        message: RawNetworkMessage,
+        count: usize,
     ) -> Result<(), BitcoinClientError> {
-        Ok(())
+        if count != 24 {
+            return Err(BitcoinClientError::MessageError);
+        };
+        match message.payload() {
+            NetworkMessage::Verack => Ok(()),
+            _ => Err(BitcoinClientError::MessageError),
+        }
     }
 }
