@@ -18,11 +18,16 @@ async fn main() -> anyhow::Result<()> {
         Err(e) => {
             return {
                 tracing::error!("Failed to initialize TCP stream");
-                Err(anyhow::anyhow!(e))
+                Err(e)
             }
         }
     };
     let mut bitcoin_client = BitcoinClient::new(stream.rx, stream.tx);
-    bitcoin_client.handshake().await?;
-    Ok(())
+    match bitcoin_client.handshake().await {
+        Ok(()) => Ok(()),
+        Err(e) => {
+            tracing::error!("Failed to perform handshake: {}", e);
+            Err(anyhow::anyhow!(e))
+        }
+    }
 }

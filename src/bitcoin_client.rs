@@ -1,5 +1,6 @@
 use std::fmt::Debug;
 
+use anyhow::Context;
 use bitcoin::{
     consensus::serialize,
     p2p::message::{NetworkMessage, RawNetworkMessage},
@@ -40,11 +41,19 @@ where
     #[tracing::instrument(name = "Handshake", skip(self))]
     pub async fn handshake(&mut self) -> Result<(), BitcoinClientError> {
         let bitcoin_version_message = BitcoinMessage::version_message();
-        let (message, count) = self.handle_message(bitcoin_version_message).await?;
-        self.verify_version_message(message, count)?;
+        let (message, count) = self
+            .handle_message(bitcoin_version_message)
+            .await
+            .context("Failed to handle version message")?;
+        self.verify_version_message(message, count)
+            .context("Failed to verify version message")?;
         let bitcoin_verack_message = BitcoinMessage::verack_message();
-        let (message, count) = self.handle_message(bitcoin_verack_message).await?;
-        self.verify_verack_message(message, count)?;
+        let (message, count) = self
+            .handle_message(bitcoin_verack_message)
+            .await
+            .context("Failed to handle verack message")?;
+        self.verify_verack_message(message, count)
+            .context("Failed to verify verack message")?;
         Ok(())
     }
 

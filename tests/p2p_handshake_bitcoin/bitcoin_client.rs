@@ -1,7 +1,4 @@
-use p2p_handshake_bitcoin::{
-    bitcoin_client::{BitcoinClient, BitcoinClientError},
-    bitcoin_message::BitcoinMessage,
-};
+use p2p_handshake_bitcoin::{bitcoin_client::BitcoinClient, bitcoin_message::BitcoinMessage};
 
 use crate::helper::BitcoinNodeMock;
 
@@ -32,10 +29,7 @@ async fn bitcoin_node_responds_with_bad_u8_slice() {
     let bitcoin_mock_node = BitcoinNodeMock::bad_u8_slice_response_on_version_message();
     let mut bitcoin_client = BitcoinClient::new(bitcoin_mock_node.reader, bitcoin_mock_node.writer);
     let response = bitcoin_client.handshake().await;
-    assert!(matches!(
-        response,
-        Err(BitcoinClientError::CommunicationError)
-    ));
+    assert!(response.is_err());
 }
 
 #[tokio::test]
@@ -52,7 +46,7 @@ async fn bitcoin_node_responds_with_malicious_version() {
         BitcoinNodeMock::on_version_message_respond_with_malicious_version_message();
     let mut bitcoin_client = BitcoinClient::new(bitcoin_node_mock.reader, bitcoin_node_mock.writer);
     let response = bitcoin_client.handshake().await;
-    assert!(matches!(response, Err(BitcoinClientError::MessageError)));
+    assert!(response.is_err());
 }
 
 #[tokio::test]
@@ -60,5 +54,5 @@ async fn bitcoin_node_responds_with_version_message_on_verack_message() {
     let bitcoin_node_mock = BitcoinNodeMock::on_verack_message_responds_with_version_message();
     let mut bitcoin_client = BitcoinClient::new(bitcoin_node_mock.reader, bitcoin_node_mock.writer);
     let response = bitcoin_client.handshake().await;
-    assert!(matches!(response, Err(BitcoinClientError::MessageError)));
+    assert!(response.is_err());
 }
