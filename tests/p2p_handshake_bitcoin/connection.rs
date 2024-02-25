@@ -1,7 +1,7 @@
 use bitcoin::{consensus::serialize, p2p::message::RawNetworkMessage};
 use p2p_handshake_bitcoin::{bitcoin_message::BitcoinMessage, connection::Connection};
 
-use crate::helper::BitcoinNodeMock;
+use crate::helper::{BitcoinNodeMock, BitcoinWrongMessage};
 
 #[tokio::test]
 async fn bitcoin_node_responds_with_version_and_verack_message() {
@@ -60,4 +60,21 @@ async fn bitcoin_node_responds_on_version_message_with_verack_message() {
         None => (BitcoinMessage::version_message(), 99),
     };
     assert_eq!(message, BitcoinMessage::verack_message());
+}
+
+#[tokio::test]
+async fn bitcoin_node_responds_with_malicious_version() {
+    let bitcoin_node_mock =
+        BitcoinNodeMock::on_version_message_respond_with_malicious_version_message();
+    let mut connection = Connection::new(bitcoin_node_mock.reader, bitcoin_node_mock.writer);
+
+    let bitcoin_version_message = BitcoinMessage::version_message();
+    let _ = connection
+        .write(serialize(&bitcoin_version_message).as_slice())
+        .await;
+    let (message, _) = match connection.read::<RawNetworkMessage>().await.unwrap() {
+        Some((message, count)) => (message, count),
+        None => (BitcoinMessage::version_message(), 99),
+    };
+    assert_eq!(message, BitcoinWrongMessage::wrong_version_message());
 }

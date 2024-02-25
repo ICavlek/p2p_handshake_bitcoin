@@ -45,3 +45,12 @@ async fn bitcoin_node_responds_with_verack_message_on_version_message() {
     let response = bitcoin_client.handshake().await;
     assert!(response.is_err());
 }
+
+#[tokio::test]
+async fn bitcoin_node_responds_with_malicious_version() {
+    let bitcoin_node_mock =
+        BitcoinNodeMock::on_version_message_respond_with_malicious_version_message();
+    let mut bitcoin_client = BitcoinClient::new(bitcoin_node_mock.reader, bitcoin_node_mock.writer);
+    let response = bitcoin_client.handshake().await;
+    assert!(response.is_err());
+}

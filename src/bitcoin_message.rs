@@ -16,7 +16,7 @@ use bitcoin::{
 pub struct BitcoinMessage;
 
 impl BitcoinMessage {
-    pub fn version_message() -> RawNetworkMessage {
+    pub fn get_bitcoin_version_message() -> VersionMessage {
         let user_agent = "/Satoshi:26.0.0/";
 
         let now = SystemTime::now()
@@ -30,7 +30,7 @@ impl BitcoinMessage {
         let receiver_address = address::Address::new(&receiver_socket, ServiceFlags::NONE);
         let sender_address = address::Address::new(&sender_socket, ServiceFlags::NONE);
 
-        let btc_version = VersionMessage::new(
+        VersionMessage::new(
             ServiceFlags::NONE,
             now,
             receiver_address,
@@ -38,11 +38,13 @@ impl BitcoinMessage {
             now as u64,
             user_agent.to_string(),
             0,
-        );
+        )
+    }
 
+    pub fn version_message() -> RawNetworkMessage {
         RawNetworkMessage::new(
             Network::Bitcoin.magic(),
-            NetworkMessage::Version(btc_version),
+            NetworkMessage::Version(BitcoinMessage::get_bitcoin_version_message()),
         )
     }
 
