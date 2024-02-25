@@ -1,6 +1,9 @@
 use std::fmt::Debug;
 
-use bitcoin::{consensus::serialize, p2p::message::RawNetworkMessage};
+use bitcoin::{
+    consensus::serialize,
+    p2p::message::{NetworkMessage, RawNetworkMessage},
+};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
 use crate::{bitcoin_message::BitcoinMessage, connection::Connection};
@@ -17,6 +20,8 @@ where
 pub enum BitcoinClientError {
     #[error("Communication error: Wrong response")]
     CommunicationError,
+    #[error("Message error: Returned message content is not valid")]
+    MessageError,
     #[error(transparent)]
     UnexpectedError(#[from] anyhow::Error),
 }
@@ -63,13 +68,19 @@ where
         }
     }
 
-    #[tracing::instrument(name = "Verifying version message", skip(self, _message, _count))]
+    #[tracing::instrument(name = "Verifying version message", skip(self, message, count))]
     fn verify_version_message(
         &self,
-        _message: RawNetworkMessage,
-        _count: usize,
+        message: RawNetworkMessage,
+        count: usize,
     ) -> Result<(), BitcoinClientError> {
-        Ok(())
+        if count != 126 {
+            return Err(BitcoinClientError::MessageError);
+        };
+        match message.payload() {
+            NetworkMessage::Version(_) => Ok(()),
+            _ => Err(BitcoinClientError::MessageError),
+        }
     }
 
     #[tracing::instrument(name = "Verifying verack message", skip(self, _message, _count))]

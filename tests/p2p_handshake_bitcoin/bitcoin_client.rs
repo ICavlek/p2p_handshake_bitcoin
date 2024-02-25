@@ -31,9 +31,7 @@ async fn bitcoin_node_responds_with_version_and_verack_message() {
 async fn bitcoin_node_responds_with_bad_u8_slice() {
     let bitcoin_mock_node = BitcoinNodeMock::bad_u8_slice_response_on_version_message();
     let mut bitcoin_client = BitcoinClient::new(bitcoin_mock_node.reader, bitcoin_mock_node.writer);
-
-    let bitcoin_version_message = BitcoinMessage::version_message();
-    let response = bitcoin_client.handle_message(bitcoin_version_message).await;
+    let response = bitcoin_client.handshake().await;
     assert!(matches!(
         response,
         Err(BitcoinClientError::CommunicationError)
@@ -44,8 +42,6 @@ async fn bitcoin_node_responds_with_bad_u8_slice() {
 async fn bitcoin_node_responds_with_verack_message_on_version_message() {
     let bitcoin_mock_node = BitcoinNodeMock::on_version_message_respond_with_verack_message();
     let mut bitcoin_client = BitcoinClient::new(bitcoin_mock_node.reader, bitcoin_mock_node.writer);
-
-    let bitcoin_version_message = BitcoinMessage::version_message();
-    let response = bitcoin_client.handle_message(bitcoin_version_message).await;
+    let response = bitcoin_client.handshake().await;
     assert!(response.is_err());
 }
