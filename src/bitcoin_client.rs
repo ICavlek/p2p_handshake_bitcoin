@@ -77,10 +77,14 @@ where
         if count != 126 {
             return Err(BitcoinClientError::MessageError);
         };
-        match message.payload() {
-            NetworkMessage::Version(_) => Ok(()),
-            _ => Err(BitcoinClientError::MessageError),
+        let version_message = match message.payload() {
+            NetworkMessage::Version(message) => message,
+            _ => return Err(BitcoinClientError::MessageError),
+        };
+        if version_message.version < 7000 {
+            return Err(BitcoinClientError::MessageError);
         }
+        Ok(())
     }
 
     #[tracing::instrument(name = "Verifying verack message", skip(self, _message, _count))]

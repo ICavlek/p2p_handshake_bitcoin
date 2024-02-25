@@ -52,5 +52,5 @@ async fn bitcoin_node_responds_with_malicious_version() {
         BitcoinNodeMock::on_version_message_respond_with_malicious_version_message();
     let mut bitcoin_client = BitcoinClient::new(bitcoin_node_mock.reader, bitcoin_node_mock.writer);
     let response = bitcoin_client.handshake().await;
-    assert!(response.is_err());
+    assert!(matches!(response, Err(BitcoinClientError::MessageError)));
 }
