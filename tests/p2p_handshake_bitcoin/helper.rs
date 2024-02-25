@@ -64,6 +64,21 @@ impl BitcoinNodeMock {
                 .build(),
         }
     }
+
+    pub fn on_verack_message_responds_with_version_message() -> BitcoinNodeMock {
+        let bitcoin_version_message = BitcoinMessage::version_message();
+        let bitcoin_verack_message = BitcoinMessage::verack_message();
+        Self {
+            reader: Builder::new()
+                .read(serialize(&bitcoin_version_message).as_slice())
+                .read(serialize(&bitcoin_version_message).as_slice())
+                .build(),
+            writer: Builder::new()
+                .write(serialize(&bitcoin_version_message).as_slice())
+                .write(serialize(&bitcoin_verack_message).as_slice())
+                .build(),
+        }
+    }
 }
 
 pub struct BitcoinWrongMessage;
