@@ -22,7 +22,7 @@ async fn main() -> anyhow::Result<()> {
             }
         }
     };
-    let mut bitcoin_client = BitcoinClient::new(stream.rx, stream.tx).unwrap();
+    let mut bitcoin_client = BitcoinClient::new(stream.rx, stream.tx);
     bitcoin_client.handshake().await?;
     Ok(())
 }

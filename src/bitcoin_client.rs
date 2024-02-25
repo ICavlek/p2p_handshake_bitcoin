@@ -27,12 +27,9 @@ where
     Writer: AsyncWriteExt + Unpin + Debug,
 {
     #[tracing::instrument(name = "Init Client", skip(rx_stream, tx_stream))]
-    pub fn new(
-        rx_stream: Reader,
-        tx_stream: Writer,
-    ) -> Result<BitcoinClient<Reader, Writer>, anyhow::Error> {
+    pub fn new(rx_stream: Reader, tx_stream: Writer) -> BitcoinClient<Reader, Writer> {
         let connection = Connection::new(rx_stream, tx_stream);
-        Ok(BitcoinClient { connection })
+        BitcoinClient { connection }
     }
 
     #[tracing::instrument(name = "Handshake", skip(self))]
