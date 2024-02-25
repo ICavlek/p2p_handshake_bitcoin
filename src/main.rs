@@ -14,9 +14,18 @@ async fn main() -> anyhow::Result<()> {
     init_subscriber(subscriber);
     let task1 = tokio::task::spawn(perform_handshake());
     let task2 = tokio::task::spawn(perform_handshake());
-
-    let _ = task1.await?;
-    let _ = task2.await?;
+    let mut handles = Vec::new();
+    handles.push(task1);
+    handles.push(task2);
+    for handle in handles {
+        let result = handle.await?;
+        match result {
+            Ok(()) => {}
+            Err(_) => {
+                tracing::error!("Error in thread {}", 1);
+            }
+        }
+    }
     Ok(())
 }
 
