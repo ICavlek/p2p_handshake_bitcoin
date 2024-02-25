@@ -35,9 +35,11 @@ where
     #[tracing::instrument(name = "Handshake", skip(self))]
     pub async fn handshake(&mut self) -> Result<(), BitcoinClientError> {
         let bitcoin_version_message = BitcoinMessage::version_message();
-        self.handle_message(bitcoin_version_message).await?;
+        let (message, count) = self.handle_message(bitcoin_version_message).await?;
+        self.verify_version_message(message, count)?;
         let bitcoin_verack_message = BitcoinMessage::verack_message();
-        self.handle_message(bitcoin_verack_message).await?;
+        let (message, count) = self.handle_message(bitcoin_verack_message).await?;
+        self.verify_verack_message(message, count)?;
         Ok(())
     }
 
@@ -59,5 +61,23 @@ where
                 "Empty buffer returned"
             ))),
         }
+    }
+
+    #[tracing::instrument(name = "Verifying version message", skip(self, _message, _count))]
+    fn verify_version_message(
+        &self,
+        _message: RawNetworkMessage,
+        _count: usize,
+    ) -> Result<(), BitcoinClientError> {
+        Ok(())
+    }
+
+    #[tracing::instrument(name = "Verifying verack message", skip(self, _message, _count))]
+    fn verify_verack_message(
+        &self,
+        _message: RawNetworkMessage,
+        _count: usize,
+    ) -> Result<(), BitcoinClientError> {
+        Ok(())
     }
 }
