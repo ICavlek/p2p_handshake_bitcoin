@@ -45,3 +45,19 @@ async fn bitcoin_node_responds_with_bad_u8_slice() {
     let response = connection.read::<RawNetworkMessage>().await;
     assert!(response.is_err());
 }
+
+#[tokio::test]
+async fn bitcoin_node_responds_on_version_message_with_verack_message() {
+    let bitcoin_mock_node = BitcoinNodeMock::on_version_message_respond_with_verack_message();
+    let mut connection = Connection::new(bitcoin_mock_node.reader, bitcoin_mock_node.writer);
+
+    let bitcoin_version_message = BitcoinMessage::version_message();
+    let _ = connection
+        .write(serialize(&bitcoin_version_message).as_slice())
+        .await;
+    let (message, _) = match connection.read::<RawNetworkMessage>().await.unwrap() {
+        Some((message, count)) => (message, count),
+        None => (BitcoinMessage::version_message(), 99),
+    };
+    assert_eq!(message, BitcoinMessage::verack_message());
+}
