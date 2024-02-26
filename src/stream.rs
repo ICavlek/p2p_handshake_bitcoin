@@ -12,9 +12,9 @@ pub struct Stream {
 
 impl Stream {
     #[tracing::instrument("Init Stream", skip(uri))]
-    pub async fn new(uri: &str) -> Result<Self, anyhow::Error> {
+    pub async fn new(uri: &str, timeout: u64) -> Result<Self, anyhow::Error> {
         let socket =
-            tokio::time::timeout(Duration::from_millis(500), TcpStream::connect(uri)).await??;
+            tokio::time::timeout(Duration::from_millis(timeout), TcpStream::connect(uri)).await??;
         let (rx, tx) = socket.into_split();
         Ok(Self { rx, tx })
     }

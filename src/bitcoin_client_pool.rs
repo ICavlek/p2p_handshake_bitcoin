@@ -9,11 +9,12 @@ pub struct BitcoinClientPool {
 }
 
 impl BitcoinClientPool {
-    pub fn new(nodes: Vec<String>) -> BitcoinClientPool {
+    pub fn new(nodes: Vec<String>, timeout: u64) -> BitcoinClientPool {
         let mut map_of_tasks: HashMap<String, JoinHandle<Result<(), anyhow::Error>>> =
             HashMap::new();
         for node in nodes {
-            let task = tokio::task::spawn(BitcoinClientPool::perform_handshake(node.clone()));
+            let task =
+                tokio::task::spawn(BitcoinClientPool::perform_handshake(node.clone(), timeout));
             map_of_tasks.insert(node, task);
         }
         Self { map_of_tasks }
@@ -43,8 +44,8 @@ impl BitcoinClientPool {
         Ok(())
     }
 
-    async fn perform_handshake(uri: String) -> Result<(), anyhow::Error> {
-        let stream = match Stream::new(&uri).await {
+    async fn perform_handshake(uri: String, timeout: u64) -> Result<(), anyhow::Error> {
+        let stream = match Stream::new(&uri, timeout).await {
             Ok(stream) => stream,
             Err(e) => {
                 return {

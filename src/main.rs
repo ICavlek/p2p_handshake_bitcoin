@@ -16,7 +16,7 @@ async fn main() -> anyhow::Result<()> {
         std::io::stdout,
     );
     init_subscriber(subscriber);
-    let bitcoin_client_pool = BitcoinClientPool::new(args.uri_nodes);
+    let bitcoin_client_pool = BitcoinClientPool::new(args.uri_nodes, args.timeout);
     bitcoin_client_pool.run().await?;
     Ok(())
 }
