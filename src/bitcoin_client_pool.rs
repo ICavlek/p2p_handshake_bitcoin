@@ -50,7 +50,7 @@ impl BitcoinClientPool {
             Err(e) => {
                 return {
                     tracing::error!("Failed to initialize TCP stream");
-                    Err(e)
+                    Err(anyhow::anyhow!("Failed to initialize TCP stream, {}", e))
                 }
             }
         };

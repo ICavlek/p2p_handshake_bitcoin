@@ -57,7 +57,6 @@ where
         Ok(())
     }
 
-    #[tracing::instrument(name = "Handling message", skip(self, message))]
     pub async fn handle_message(
         &mut self,
         message: RawNetworkMessage,
@@ -77,7 +76,6 @@ where
         }
     }
 
-    #[tracing::instrument(name = "Verifying version message", skip(self, message, count))]
     fn verify_version_message(
         &self,
         message: RawNetworkMessage,
@@ -96,7 +94,6 @@ where
         Ok(())
     }
 
-    #[tracing::instrument(name = "Verifying verack message", skip(self, message, count))]
     fn verify_verack_message(
         &self,
         message: RawNetworkMessage,
