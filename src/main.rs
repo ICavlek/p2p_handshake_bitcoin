@@ -12,25 +12,29 @@ async fn main() -> anyhow::Result<()> {
         std::io::stdout,
     );
     init_subscriber(subscriber);
-    let task1 = tokio::task::spawn(perform_handshake());
-    let task2 = tokio::task::spawn(perform_handshake());
+    let task1 = tokio::task::spawn(perform_handshake("45.9.148.241:8333"));
+    let task2 = tokio::task::spawn(perform_handshake("95.105.172.171:8333"));
     let mut handles = Vec::new();
     handles.push(task1);
     handles.push(task2);
-    for handle in handles {
+    for (index, handle) in handles.into_iter().enumerate() {
         let result = handle.await?;
         match result {
             Ok(()) => {}
-            Err(_) => {
-                tracing::error!("Error in thread {}", 1);
+            Err(e) => {
+                tracing::error!(
+                    error.cause_chain = ?e,
+                    error.message = %e,
+                    "Error in thread {}", index
+                );
             }
         }
     }
     Ok(())
 }
 
-async fn perform_handshake() -> Result<(), anyhow::Error> {
-    let stream = match Stream::new("45.9.148.241:8333").await {
+async fn perform_handshake(uri: &str) -> Result<(), anyhow::Error> {
+    let stream = match Stream::new(uri).await {
         Ok(stream) => stream,
         Err(e) => {
             return {
