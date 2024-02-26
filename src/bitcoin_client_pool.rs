@@ -44,6 +44,7 @@ impl BitcoinClientPool {
         Ok(())
     }
 
+    #[tracing::instrument("Performing handshake", skip(timeout))]
     async fn perform_handshake(uri: String, timeout: u64) -> Result<(), anyhow::Error> {
         let stream = match Stream::new(&uri, timeout).await {
             Ok(stream) => stream,

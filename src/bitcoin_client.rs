@@ -32,13 +32,11 @@ where
     Reader: AsyncReadExt + Unpin + Debug,
     Writer: AsyncWriteExt + Unpin + Debug,
 {
-    #[tracing::instrument(name = "Init Client", skip(rx_stream, tx_stream))]
     pub fn new(rx_stream: Reader, tx_stream: Writer) -> BitcoinClient<Reader, Writer> {
         let connection = Connection::new(rx_stream, tx_stream);
         BitcoinClient { connection }
     }
 
-    #[tracing::instrument(name = "Handshake", skip(self))]
     pub async fn handshake(&mut self) -> Result<(), BitcoinClientError> {
         let bitcoin_version_message = BitcoinMessage::version_message();
         let (message, count) = self
