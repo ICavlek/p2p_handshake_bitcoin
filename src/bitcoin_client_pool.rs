@@ -1,25 +1,27 @@
+use std::collections::HashMap;
+
 use tokio::task::JoinHandle;
 
 use crate::{bitcoin_client::BitcoinClient, stream::Stream};
 
 pub struct BitcoinClientPool {
-    vec_of_tasks: Vec<(String, JoinHandle<Result<(), anyhow::Error>>)>,
+    map_of_tasks: HashMap<String, JoinHandle<Result<(), anyhow::Error>>>,
 }
 
 impl BitcoinClientPool {
     pub fn new(nodes: Vec<String>) -> BitcoinClientPool {
-        let mut vec_of_tasks: Vec<(String, JoinHandle<Result<(), anyhow::Error>>)> =
-            Vec::with_capacity(nodes.len());
+        let mut map_of_tasks: HashMap<String, JoinHandle<Result<(), anyhow::Error>>> =
+            HashMap::new();
         for node in nodes {
             let task = tokio::task::spawn(BitcoinClientPool::perform_handshake(node.clone()));
-            vec_of_tasks.push((node, task));
+            map_of_tasks.insert(node, task);
         }
-        Self { vec_of_tasks }
+        Self { map_of_tasks }
     }
 
     pub async fn run(self) -> Result<(), anyhow::Error> {
-        for task in self.vec_of_tasks.into_iter() {
-            let result = match task.1.await {
+        for (node, task) in self.map_of_tasks.into_iter() {
+            let result = match task.await {
                 Ok(result) => result,
                 Err(e) => {
                     tracing::error!(
@@ -31,10 +33,10 @@ impl BitcoinClientPool {
             };
             match result {
                 Ok(()) => {
-                    tracing::info!("Successfully performed handshake for Node {}", task.0);
+                    tracing::info!("Successfully performed handshake for Node {}", node);
                 }
                 Err(e) => {
-                    tracing::error!(error.cause_chain = ?e, error.message = %e,"Error with Node {}", task.0);
+                    tracing::error!(error.cause_chain = ?e, error.message = %e,"Error with Node {}", node);
                 }
             }
         }
