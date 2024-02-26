@@ -1,6 +1,5 @@
 use p2p_handshake_bitcoin::{
-    bitcoin_client::BitcoinClient,
-    stream::Stream,
+    bitcoin_client_pool::BitcoinClientPool,
     telemetry::{get_subscriber, init_subscriber},
 };
 
@@ -12,43 +11,6 @@ async fn main() -> anyhow::Result<()> {
         std::io::stdout,
     );
     init_subscriber(subscriber);
-    let task1 = tokio::task::spawn(perform_handshake("45.9.148.241:8333"));
-    let task2 = tokio::task::spawn(perform_handshake("95.105.172.171:8333"));
-    let mut handles = Vec::new();
-    handles.push(task1);
-    handles.push(task2);
-    for (index, handle) in handles.into_iter().enumerate() {
-        let result = handle.await?;
-        match result {
-            Ok(()) => {}
-            Err(e) => {
-                tracing::error!(
-                    error.cause_chain = ?e,
-                    error.message = %e,
-                    "Error in thread {}", index
-                );
-            }
-        }
-    }
+    BitcoinClientPool::run().await?;
     Ok(())
-}
-
-async fn perform_handshake(uri: &str) -> Result<(), anyhow::Error> {
-    let stream = match Stream::new(uri).await {
-        Ok(stream) => stream,
-        Err(e) => {
-            return {
-                tracing::error!("Failed to initialize TCP stream");
-                Err(e)
-            }
-        }
-    };
-    let mut bitcoin_client = BitcoinClient::new(stream.rx, stream.tx);
-    match bitcoin_client.handshake().await {
-        Ok(()) => Ok(()),
-        Err(e) => {
-            tracing::error!("Failed to perform handshake: {}", e);
-            Err(anyhow::anyhow!(e))
-        }
-    }
 }
