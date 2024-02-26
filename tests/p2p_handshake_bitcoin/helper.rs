@@ -3,7 +3,7 @@ use bitcoin::{
     p2p::message::{NetworkMessage, RawNetworkMessage},
     Network,
 };
-use p2p_handshake_bitcoin::bitcoin_message::BitcoinMessage;
+use p2p_handshake_bitcoin::bitcoin::message::BitcoinMessage;
 use tokio_test::io::{Builder, Mock};
 
 pub struct BitcoinNodeMock {

@@ -1,4 +1,4 @@
-use p2p_handshake_bitcoin::{bitcoin_client::BitcoinClient, bitcoin_message::BitcoinMessage};
+use p2p_handshake_bitcoin::{bitcoin::client::BitcoinClient, bitcoin::message::BitcoinMessage};
 
 use crate::helper::BitcoinNodeMock;
 

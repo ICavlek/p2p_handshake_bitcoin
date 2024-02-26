@@ -1,5 +1,5 @@
 use bitcoin::{consensus::serialize, p2p::message::RawNetworkMessage};
-use p2p_handshake_bitcoin::{bitcoin_message::BitcoinMessage, connection::Connection};
+use p2p_handshake_bitcoin::{bitcoin::connection::Connection, bitcoin::message::BitcoinMessage};
 
 use crate::helper::{BitcoinNodeMock, BitcoinWrongMessage};
 

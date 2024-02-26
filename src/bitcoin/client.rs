@@ -7,7 +7,7 @@ use bitcoin::{
 };
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
-use crate::{bitcoin_message::BitcoinMessage, connection::Connection};
+use crate::{bitcoin::connection::Connection, bitcoin::message::BitcoinMessage};
 
 pub struct BitcoinClient<Reader, Writer>
 where

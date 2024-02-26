@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use tokio::task::JoinHandle;
 
-use crate::{bitcoin_client::BitcoinClient, stream::Stream};
+use crate::{bitcoin::client::BitcoinClient, bitcoin::stream::Stream};
 
 pub struct BitcoinClientPool {
     map_of_tasks: HashMap<String, JoinHandle<Result<(), anyhow::Error>>>,

@@ -1,7 +1,7 @@
 use clap::Parser;
 
 use p2p_handshake_bitcoin::{
-    bitcoin_client_pool::BitcoinClientPool,
+    bitcoin::client_pool::BitcoinClientPool,
     parser_arguments::Arguments,
     telemetry::{get_subscriber, init_subscriber},
 };
