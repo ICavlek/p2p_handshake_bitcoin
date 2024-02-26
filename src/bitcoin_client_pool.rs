@@ -8,7 +8,8 @@ pub struct BitcoinClientPool {
 
 impl BitcoinClientPool {
     pub fn new(nodes: Vec<String>) -> BitcoinClientPool {
-        let mut vec_of_tasks: Vec<(String, JoinHandle<Result<(), anyhow::Error>>)> = Vec::new();
+        let mut vec_of_tasks: Vec<(String, JoinHandle<Result<(), anyhow::Error>>)> =
+            Vec::with_capacity(nodes.len());
         for node in nodes {
             let task = tokio::task::spawn(BitcoinClientPool::perform_handshake(node.clone()));
             vec_of_tasks.push((node, task));
@@ -29,7 +30,9 @@ impl BitcoinClientPool {
                 }
             };
             match result {
-                Ok(()) => {}
+                Ok(()) => {
+                    tracing::info!("Successfully performed handshake for Node {}", task.0);
+                }
                 Err(e) => {
                     tracing::error!(error.cause_chain = ?e, error.message = %e,"Error with Node {}", task.0);
                 }
