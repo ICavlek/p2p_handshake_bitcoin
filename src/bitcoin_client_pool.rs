@@ -1,16 +1,24 @@
+use tokio::task::JoinHandle;
+
 use crate::{bitcoin_client::BitcoinClient, stream::Stream};
 
-pub struct BitcoinClientPool;
+pub struct BitcoinClientPool {
+    vec_of_tasks: Vec<(String, JoinHandle<Result<(), anyhow::Error>>)>,
+}
 
 impl BitcoinClientPool {
-    pub async fn run() -> Result<(), anyhow::Error> {
-        let task1 = tokio::task::spawn(BitcoinClientPool::perform_handshake("45.9.148.241:8333"));
-        let task2 = tokio::task::spawn(BitcoinClientPool::perform_handshake("95.105.172.171:8333"));
-        let mut handles = Vec::new();
-        handles.push(task1);
-        handles.push(task2);
-        for (index, handle) in handles.into_iter().enumerate() {
-            let result = match handle.await {
+    pub fn new(nodes: Vec<String>) -> BitcoinClientPool {
+        let mut vec_of_tasks: Vec<(String, JoinHandle<Result<(), anyhow::Error>>)> = Vec::new();
+        for node in nodes {
+            let task = tokio::task::spawn(BitcoinClientPool::perform_handshake(node.clone()));
+            vec_of_tasks.push((node, task));
+        }
+        Self { vec_of_tasks }
+    }
+
+    pub async fn run(self) -> Result<(), anyhow::Error> {
+        for task in self.vec_of_tasks.into_iter() {
+            let result = match task.1.await {
                 Ok(result) => result,
                 Err(e) => {
                     tracing::error!(
@@ -23,15 +31,15 @@ impl BitcoinClientPool {
             match result {
                 Ok(()) => {}
                 Err(e) => {
-                    tracing::error!(error.cause_chain = ?e, error.message = %e,"Error in Thread {}", index);
+                    tracing::error!(error.cause_chain = ?e, error.message = %e,"Error with Node {}", task.0);
                 }
             }
         }
         Ok(())
     }
 
-    async fn perform_handshake(uri: &str) -> Result<(), anyhow::Error> {
-        let stream = match Stream::new(uri).await {
+    async fn perform_handshake(uri: String) -> Result<(), anyhow::Error> {
+        let stream = match Stream::new(&uri).await {
             Ok(stream) => stream,
             Err(e) => {
                 return {

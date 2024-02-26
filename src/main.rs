@@ -11,6 +11,10 @@ async fn main() -> anyhow::Result<()> {
         std::io::stdout,
     );
     init_subscriber(subscriber);
-    BitcoinClientPool::run().await?;
+    let bitcoin_client_pool = BitcoinClientPool::new(vec![
+        "45.9.148.241:8333".to_string(),
+        "95.105.172.171:8333".to_string(),
+    ]);
+    bitcoin_client_pool.run().await?;
     Ok(())
 }
