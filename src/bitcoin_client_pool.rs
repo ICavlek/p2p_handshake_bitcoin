@@ -10,15 +10,20 @@ impl BitcoinClientPool {
         handles.push(task1);
         handles.push(task2);
         for (index, handle) in handles.into_iter().enumerate() {
-            let result = handle.await?;
-            match result {
-                Ok(()) => {}
+            let result = match handle.await {
+                Ok(result) => result,
                 Err(e) => {
                     tracing::error!(
                         error.cause_chain = ?e,
                         error.message = %e,
-                        "Error in thread {}", index
                     );
+                    Err(anyhow::anyhow!(e))
+                }
+            };
+            match result {
+                Ok(()) => {}
+                Err(e) => {
+                    tracing::error!(error.cause_chain = ?e, error.message = %e,"Error in Thread {}", index);
                 }
             }
         }
