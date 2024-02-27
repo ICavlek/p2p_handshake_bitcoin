@@ -10,7 +10,7 @@ pub struct BitcoinClientPool {
 }
 
 impl BitcoinClientPool {
-    /// Creates mutltiple bitcoin clients from the vector of uri's
+    /// Creates mutltiple bitcoin clients from the vector of uri's.
     /// Example shows localhost as uri, instead use real bitcoin node ip.
     ///
     /// #Example
@@ -37,6 +37,24 @@ impl BitcoinClientPool {
         Self { tasks }
     }
 
+    /// Runs mutltiple bitcoin clients from the BitcoinClientPool.
+    /// Example shows localhost as uri, instead use real bitcoin node ip.
+    ///
+    /// #Example
+    ///
+    /// ```
+    /// use p2p_handshake_bitcoin::bitcoin::client_pool::BitcoinClientPool;
+    ///
+    /// #[tokio::main]
+    /// async fn main() {
+    ///     let clients = vec![
+    ///         "127.0.0.1:1".to_string(), "127.0.0.1:2".to_string(), "127.0.0.1:3".to_string()
+    ///     ];
+    ///     let timeout = 500; // miliseconds
+    ///     let client_pool = BitcoinClientPool::new(clients, timeout);
+    ///     client_pool.run().await.unwrap();
+    /// }
+    /// ```
     pub async fn run(self) -> Result<(), anyhow::Error> {
         for (node, task) in self.tasks.into_iter() {
             let result = match task.await {
@@ -61,6 +79,7 @@ impl BitcoinClientPool {
         Ok(())
     }
 
+    /// Runst handshake on all provided bitcoin clients.
     #[tracing::instrument("Performing handshake", skip(timeout))]
     async fn perform_handshake(uri: String, timeout: u64) -> Result<(), anyhow::Error> {
         let stream = match Stream::new(&uri, timeout).await {
