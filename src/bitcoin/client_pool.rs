@@ -5,23 +5,22 @@ use tokio::task::JoinHandle;
 use crate::{bitcoin::client::BitcoinClient, bitcoin::stream::Stream};
 
 pub struct BitcoinClientPool {
-    map_of_tasks: HashMap<String, JoinHandle<Result<(), anyhow::Error>>>,
+    tasks: HashMap<String, JoinHandle<Result<(), anyhow::Error>>>,
 }
 
 impl BitcoinClientPool {
     pub fn new(nodes: Vec<String>, timeout: u64) -> BitcoinClientPool {
-        let mut map_of_tasks: HashMap<String, JoinHandle<Result<(), anyhow::Error>>> =
-            HashMap::new();
+        let mut tasks: HashMap<String, JoinHandle<Result<(), anyhow::Error>>> = HashMap::new();
         for node in nodes {
             let task =
                 tokio::task::spawn(BitcoinClientPool::perform_handshake(node.clone(), timeout));
-            map_of_tasks.insert(node, task);
+            tasks.insert(node, task);
         }
-        Self { map_of_tasks }
+        Self { tasks }
     }
 
     pub async fn run(self) -> Result<(), anyhow::Error> {
-        for (node, task) in self.map_of_tasks.into_iter() {
+        for (node, task) in self.tasks.into_iter() {
             let result = match task.await {
                 Ok(result) => result,
                 Err(e) => {
