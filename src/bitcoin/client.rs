@@ -95,6 +95,32 @@ where
         Ok(())
     }
 
+    /// Bitcoin client with handle message sends message, receives response and
+    /// checks whether there were any errors during the process.
+    /// It sends the version message, accepts the version message, sends back
+    /// verack message and the accepts verack message.
+    /// Use [Stream] module as the basis and [VersionMessage] to send it to
+    /// remote node.
+    ///
+    /// [Stream]: crate::bitcoin::stream::Stream
+    /// [VersionMessage]: crate::bitcoin::message::BitcoinMessage
+    /// # Example
+    ///
+    /// ```
+    /// use p2p_handshake_bitcoin::bitcoin::client::BitcoinClient;
+    /// use p2p_handshake_bitcoin::bitcoin::stream::Stream;
+    /// use p2p_handshake_bitcoin::bitcoin::message::BitcoinMessage;
+    ///
+    /// let uri = "127.0.0.1:8333";
+    /// let timeout = 200; // In miliseconds
+    /// async {
+    ///     let stream = Stream::new(uri, 200).await.unwrap();
+    ///     let mut bitcoin_client = BitcoinClient::new(stream.rx, stream.tx);
+    ///     let result = bitcoin_client.handle_message(
+    ///         BitcoinMessage::version_message()
+    ///     ).await;
+    /// };
+    /// ```
     pub async fn handle_message(
         &mut self,
         message: RawNetworkMessage,
@@ -114,6 +140,7 @@ where
         }
     }
 
+    /// Basic version message verification
     fn verify_version_message(
         &self,
         message: RawNetworkMessage,
@@ -132,6 +159,7 @@ where
         Ok(())
     }
 
+    /// Basic verack message verification
     fn verify_verack_message(
         &self,
         message: RawNetworkMessage,
