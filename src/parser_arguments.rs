@@ -7,7 +7,7 @@ use clap::{command, Parser};
 #[command(propagate_version = true)]
 pub struct Arguments {
     #[clap(required = true)]
-    pub uri_nodes: Vec<String>,
+    pub ip_nodes: Vec<String>,
     #[arg(long, short, default_value_t = 500, help = "connection timeout")]
     pub timeout: u64,
 }

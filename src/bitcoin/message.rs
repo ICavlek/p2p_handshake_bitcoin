@@ -13,9 +13,11 @@ use bitcoin::{
     Network,
 };
 
+/// Module that creates Bitcoin compatible messages
 pub struct BitcoinMessage;
 
 impl BitcoinMessage {
+    /// Returns a VersionMessage
     pub fn get_bitcoin_version_message() -> VersionMessage {
         let user_agent = "/Satoshi:26.0.0/";
 
@@ -41,6 +43,7 @@ impl BitcoinMessage {
         )
     }
 
+    /// Returns a VersionMessage which can be sent to Bitcoin node
     pub fn version_message() -> RawNetworkMessage {
         RawNetworkMessage::new(
             Network::Bitcoin.magic(),
@@ -48,6 +51,7 @@ impl BitcoinMessage {
         )
     }
 
+    /// Returns a VerackMessage which can be sent to Bitcoin node
     pub fn verack_message() -> RawNetworkMessage {
         RawNetworkMessage::new(Network::Bitcoin.magic(), NetworkMessage::Verack)
     }

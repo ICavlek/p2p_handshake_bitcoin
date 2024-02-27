@@ -36,7 +36,7 @@ where
 {
     /// Creates a Bitcoin client based on provided reading and writing streams.
     /// Use [Stream] module as the basis.
-    /// Example shows localhost as uri, instead use real bitcoin node ip.
+    /// Example shows localhost ip address and port, instead use real bitcoin node ip.
     ///
     /// [Stream]: crate::bitcoin::stream::Stream
     /// # Example
@@ -45,10 +45,10 @@ where
     /// use p2p_handshake_bitcoin::bitcoin::client::BitcoinClient;
     /// use p2p_handshake_bitcoin::bitcoin::stream::Stream;
     ///
-    /// let uri = "127.0.0.1:8333";
+    /// let ip_address_port = "127.0.0.1:8333";
     /// let timeout = 200; // In miliseconds
     /// async {
-    ///     let stream = Stream::new(uri, 200).await.unwrap();
+    ///     let stream = Stream::new(ip_address_port, 200).await.unwrap();
     ///     let bitcoin_client = BitcoinClient::new(stream.rx, stream.tx);
     /// };
     /// ```
@@ -61,7 +61,7 @@ where
     /// It sends the version message, accepts the version message, sends back
     /// verack message and the accepts verack message.
     /// Use [Stream] module as the basis.
-    /// Example shows localhost as uri, instead use real bitcoin node ip.
+    /// Example shows localhost ip address, instead use real bitcoin node ip.
     ///
     /// [Stream]: crate::bitcoin::stream::Stream
     ///
@@ -71,10 +71,10 @@ where
     /// use p2p_handshake_bitcoin::bitcoin::client::BitcoinClient;
     /// use p2p_handshake_bitcoin::bitcoin::stream::Stream;
     ///
-    /// let uri = "127.0.0.1:8333";
+    /// let ip_address_port = "127.0.0.1:8333";
     /// let timeout = 200; // In miliseconds
     /// async {
-    ///     let stream = Stream::new(uri, 200).await.unwrap();
+    ///     let stream = Stream::new(ip_address_port, 200).await.unwrap();
     ///     let mut bitcoin_client = BitcoinClient::new(stream.rx, stream.tx);
     ///     let result = bitcoin_client.handshake().await;
     /// };
@@ -103,7 +103,7 @@ where
     /// verack message and the accepts verack message.
     /// Use [Stream] module as the basis and [VersionMessage] to send it to
     /// remote node.
-    /// Example shows localhost as uri, instead use real bitcoin node ip.
+    /// Example shows localhost as ip address, instead use real bitcoin node ip.
     ///
     /// [Stream]: crate::bitcoin::stream::Stream
     /// [VersionMessage]: crate::bitcoin::message::BitcoinMessage
@@ -114,10 +114,10 @@ where
     /// use p2p_handshake_bitcoin::bitcoin::stream::Stream;
     /// use p2p_handshake_bitcoin::bitcoin::message::BitcoinMessage;
     ///
-    /// let uri = "127.0.0.1:8333";
+    /// let ip_address_port = "127.0.0.1:8333";
     /// let timeout = 200; // In miliseconds
     /// async {
-    ///     let stream = Stream::new(uri, 200).await.unwrap();
+    ///     let stream = Stream::new(ip_address_port, 200).await.unwrap();
     ///     let mut bitcoin_client = BitcoinClient::new(stream.rx, stream.tx);
     ///     let result = bitcoin_client.handle_message(
     ///         BitcoinMessage::version_message()
