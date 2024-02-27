@@ -36,6 +36,7 @@ where
 {
     /// Creates a Bitcoin client based on provided reading and writing streams.
     /// Use [Stream] module as the basis.
+    /// Example shows localhost as uri, instead use real bitcoin node ip.
     ///
     /// [Stream]: crate::bitcoin::stream::Stream
     /// # Example
@@ -60,6 +61,7 @@ where
     /// It sends the version message, accepts the version message, sends back
     /// verack message and the accepts verack message.
     /// Use [Stream] module as the basis.
+    /// Example shows localhost as uri, instead use real bitcoin node ip.
     ///
     /// [Stream]: crate::bitcoin::stream::Stream
     ///
@@ -101,6 +103,7 @@ where
     /// verack message and the accepts verack message.
     /// Use [Stream] module as the basis and [VersionMessage] to send it to
     /// remote node.
+    /// Example shows localhost as uri, instead use real bitcoin node ip.
     ///
     /// [Stream]: crate::bitcoin::stream::Stream
     /// [VersionMessage]: crate::bitcoin::message::BitcoinMessage

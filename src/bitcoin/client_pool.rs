@@ -4,11 +4,29 @@ use tokio::task::JoinHandle;
 
 use crate::{bitcoin::client::BitcoinClient, bitcoin::stream::Stream};
 
+/// Module to handle multiple bitcoin client handshakes
 pub struct BitcoinClientPool {
     tasks: HashMap<String, JoinHandle<Result<(), anyhow::Error>>>,
 }
 
 impl BitcoinClientPool {
+    /// Creates mutltiple bitcoin clients from the vector of uri's
+    /// Example shows localhost as uri, instead use real bitcoin node ip.
+    ///
+    /// #Example
+    ///
+    /// ```
+    /// use p2p_handshake_bitcoin::bitcoin::client_pool::BitcoinClientPool;
+    ///
+    /// #[tokio::main]
+    /// async fn main() {
+    ///     let clients = vec![
+    ///         "127.0.0.1:1".to_string(), "127.0.0.1:2".to_string(), "127.0.0.1:3".to_string()
+    ///     ];
+    ///     let timeout = 500; // miliseconds
+    ///     let client_pool = BitcoinClientPool::new(clients, timeout);
+    /// }
+    /// ```
     pub fn new(nodes: Vec<String>, timeout: u64) -> BitcoinClientPool {
         let mut tasks: HashMap<String, JoinHandle<Result<(), anyhow::Error>>> = HashMap::new();
         for node in nodes {
