@@ -9,6 +9,7 @@ use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
 use crate::{bitcoin::connection::Connection, bitcoin::message::BitcoinMessage};
 
+/// Client that is used to establish communication with the remote node.
 pub struct BitcoinClient<Reader, Writer>
 where
     Reader: AsyncReadExt + Unpin,
@@ -17,6 +18,7 @@ where
     connection: Connection<Reader, Writer>,
 }
 
+/// Error enumeration to represent higher abstraction level of errors.
 #[derive(thiserror::Error, Debug)]
 pub enum BitcoinClientError {
     #[error("Communication error: Wrong response")]
@@ -32,11 +34,49 @@ where
     Reader: AsyncReadExt + Unpin + Debug,
     Writer: AsyncWriteExt + Unpin + Debug,
 {
+    /// Creates a Bitcoin client based on provided reading and writing streams.
+    /// Use [Stream] module as the basis.
+    ///
+    /// [Stream]: crate::bitcoin::stream::Stream
+    /// # Example
+    ///
+    /// ```
+    /// use p2p_handshake_bitcoin::bitcoin::client::BitcoinClient;
+    /// use p2p_handshake_bitcoin::bitcoin::stream::Stream;
+    ///
+    /// let uri = "127.0.0.1:8333";
+    /// let timeout = 200; // In miliseconds
+    /// async {
+    ///     let stream = Stream::new(uri, 200).await.unwrap();
+    ///     let bitcoin_client = BitcoinClient::new(stream.rx, stream.tx);
+    /// };
+    /// ```
     pub fn new(rx_stream: Reader, tx_stream: Writer) -> BitcoinClient<Reader, Writer> {
         let connection = Connection::new(rx_stream, tx_stream);
         BitcoinClient { connection }
     }
 
+    /// Bitcoin client performs handshake with the remote node provided in
+    /// It sends the version message, accepts the version message, sends back
+    /// verack message and the accepts verack message.
+    /// Use [Stream] module as the basis.
+    ///
+    /// [Stream]: crate::bitcoin::stream::Stream
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use p2p_handshake_bitcoin::bitcoin::client::BitcoinClient;
+    /// use p2p_handshake_bitcoin::bitcoin::stream::Stream;
+    ///
+    /// let uri = "127.0.0.1:8333";
+    /// let timeout = 200; // In miliseconds
+    /// async {
+    ///     let stream = Stream::new(uri, 200).await.unwrap();
+    ///     let mut bitcoin_client = BitcoinClient::new(stream.rx, stream.tx);
+    ///     let result = bitcoin_client.handshake().await;
+    /// };
+    /// ```
     pub async fn handshake(&mut self) -> Result<(), BitcoinClientError> {
         let bitcoin_version_message = BitcoinMessage::version_message();
         let (message, count) = self
