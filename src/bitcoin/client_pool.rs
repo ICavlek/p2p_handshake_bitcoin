@@ -10,7 +10,7 @@ pub struct BitcoinClientPool {
 }
 
 impl BitcoinClientPool {
-    /// Creates mutltiple bitcoin clients from the vector of uri's.
+    /// Creates mutltiple bitcoin clients from the vector of ip adddresses.
     /// Example shows localhost as ip address, instead use real bitcoin node ip.
     ///
     /// #Example
